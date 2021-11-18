@@ -41,12 +41,15 @@ class PluginIcon extends Component {
 }
 
 export default class Memory extends Component {
+
   static displayName() {
     return 'memory'
   }
 
   constructor(props) {
     super(props)
+    
+    this.showAsGb = true
 
     this.state = {
       activeMemory: 0,
@@ -68,8 +71,9 @@ export default class Memory extends Component {
 
   getMemory() {
     return memoryData().then(memory => {
-      const totalMemory = this.getMb(memory.total)
-      const activeMemory = this.getMb(memory.active)
+      const tranformBytes = (this.showAsGb) ? this.getGb : this.getMb
+      const totalMemory = tranformBytes(memory.total)
+      const activeMemory = tranformBytes(memory.active)
       const totalWidth = totalMemory.toString().length
 
       return {
@@ -88,10 +92,19 @@ export default class Memory extends Component {
     return (bytes / 1048576).toFixed(0)
   }
 
+  getGb(bytes) {
+    // 1024 * 1024 * 1024 = 1073741824
+    return (bytes / 1073741824).toFixed(0)
+  }
+
+  get memDisplay() {
+    return (this.showAsGb) ? 'GB' : 'MB'
+  }
+
   render() {
     return (
       <div className='wrapper'>
-        <PluginIcon /> {this.state.activeMemory}MB / {this.state.totalMemory}MB
+        <PluginIcon /> {this.state.activeMemory}{this.memDisplay} / {this.state.totalMemory}{this.memDisplay}
 
         <style jsx>{`
           .wrapper {
